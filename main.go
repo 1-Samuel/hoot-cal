@@ -1,14 +1,17 @@
-package hoot_cal
+package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/arran4/golang-ical"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/exp/maps"
 	"golang.org/x/oauth2/clientcredentials"
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -106,17 +109,18 @@ type OwlResponse struct {
 func main() {
 	client := configureApiClient()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/owl.ics", func(w http.ResponseWriter, request *http.Request) {
-		w.Header().Set("Content-type", "text/calendar")
-		w.Header().Set("charset", "utf-8")
-		w.Header().Set("Content-Disposition", "inline")
-		w.Header().Set("filename", "owl.ics")
+	r := gin.Default()
+
+	r.GET("/owl.ics", func(c *gin.Context) {
+		c.Header("Content-type", "text/calendar")
+		c.Header("charset", "utf-8")
+		c.Header("Content-Disposition", "inline")
+		c.Header("filename", "owl.ics")
 
 		resp, err := client.Get("https://us.api.blizzard.com/owl/v1/owl2")
 
 		if err != nil {
-			writeError(http.StatusInternalServerError, "error requesting matches", w, err)
+			return
 		}
 
 		defer resp.Body.Close()
@@ -126,17 +130,23 @@ func main() {
 			json.NewDecoder(resp.Body).Decode(response)
 			cal := ics.NewCalendar()
 			cal.SetMethod(ics.MethodRequest)
-			for _, match := range response.Matches {
+			matches := maps.Values(response.Matches)
+			sort.Slice(matches, func(i, j int) bool {
+				return time.Time(matches[i].StartTimestamp).Before(time.Time(matches[j].StartTimestamp))
+			})
+			for _, match := range matches {
+				teams := make([]int, 0, len(match.Teams))
+
+				for _, value := range match.Teams {
+					teams = append(teams, value.ID)
+				}
+
+				teamRed := response.Teams[teams[0]]
+				teamBlue := response.Teams[teams[1]]
+
+				//println(time.Time(match.StartTimestamp).String() + ": " + teamRed.Name + " - " + teamBlue.Name)
+
 				if time.Now().Before(time.Time(match.EndTimestamp)) {
-					teams := make([]int, 0, len(match.Teams))
-
-					for _, value := range match.Teams {
-						teams = append(teams, value.ID)
-					}
-
-					teamRed := response.Teams[teams[0]]
-					teamBlue := response.Teams[teams[1]]
-
 					event := cal.AddEvent(fmt.Sprintf("%d@owl", match.ID))
 					event.SetStartAt(time.Time(match.StartTimestamp))
 					event.SetEndAt(time.Time(match.EndTimestamp))
@@ -144,13 +154,13 @@ func main() {
 				}
 			}
 
-			writeSuccess(cal.Serialize(), w)
+			c.Writer.WriteString(cal.Serialize())
 		} else {
 			println("api responsed with status code: " + strconv.Itoa(resp.StatusCode))
 		}
 	})
 
-	http.ListenAndServe(":8080", mux)
+	r.Run(":8080")
 
 }
 
