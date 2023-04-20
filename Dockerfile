@@ -4,9 +4,9 @@ WORKDIR /go/src
 
 COPY . .
 
-RUN go build -o api .
-
 ENV GIN_MODE=release
+
+RUN go build -o api .
 
 EXPOSE 8080
 

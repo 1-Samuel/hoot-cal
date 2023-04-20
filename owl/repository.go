@@ -1,4 +1,4 @@
-package hoot_cal
+package owl
 
 import (
 	"encoding/json"
@@ -9,18 +9,18 @@ import (
 const url = "https://us.api.blizzard.com/owl/v1/owl2"
 
 type Repository interface {
-	Get() (*OwlResponse, error)
+	Get() (*Response, error)
 }
 
-type matchRespoitoryApi struct {
+type respoitoryApi struct {
 	client http.Client
 }
 
-func NewMatchRepositoryApi(client http.Client) Repository {
-	return matchRespoitoryApi{client: client}
+func NewRepositoryApi(client http.Client) Repository {
+	return respoitoryApi{client: client}
 }
 
-func (r matchRespoitoryApi) Get() (*OwlResponse, error) {
+func (r respoitoryApi) Get() (*Response, error) {
 	resp, err := r.client.Get(url)
 
 	if err != nil {
@@ -33,7 +33,7 @@ func (r matchRespoitoryApi) Get() (*OwlResponse, error) {
 		return nil, errors.New("could not get matches from api")
 	}
 
-	response := &OwlResponse{}
+	response := new(Response)
 	err = json.NewDecoder(resp.Body).Decode(response)
 	if err != nil {
 		return nil, err

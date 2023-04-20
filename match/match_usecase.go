@@ -1,18 +1,19 @@
-package hoot_cal
+package match
 
 import (
 	"fmt"
+	"github.com/1-samuel/hoot-cal/owl"
 	ics "github.com/arran4/golang-ical"
 	"golang.org/x/exp/maps"
 	"sort"
 	"time"
 )
 
-type MatchUsecase struct {
-	repo Repository
+type Usecase struct {
+	repo owl.Repository
 }
 
-func (u MatchUsecase) FindAll() ([]Match, error) {
+func (u Usecase) FindAll() ([]owl.Match, error) {
 	response, err := u.repo.Get()
 
 	if err != nil {
@@ -26,7 +27,7 @@ func (u MatchUsecase) FindAll() ([]Match, error) {
 	return matches, nil
 }
 
-func (u MatchUsecase) FindAllCal() (*ics.Calendar, error) {
+func (u Usecase) FindAllCal() (*ics.Calendar, error) {
 	response, err := u.repo.Get()
 
 	if err != nil {

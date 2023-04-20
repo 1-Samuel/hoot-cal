@@ -1,15 +1,20 @@
-package hoot_cal
+package match
 
 import (
+	"github.com/1-samuel/hoot-cal/owl"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-type MatchResource struct {
-	usecase MatchUsecase
+type Resource struct {
+	usecase Usecase
 }
 
-func (r MatchResource) GetAll(c *gin.Context) {
+func NewMatchResource(repository owl.Repository) Resource {
+	return Resource{usecase: Usecase{repo: repository}}
+}
+
+func (r Resource) GetAll(c *gin.Context) {
 	matches, err := r.usecase.FindAll()
 
 	if err != nil {
@@ -20,7 +25,7 @@ func (r MatchResource) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, matches)
 }
 
-func (r MatchResource) GetCalendar(c *gin.Context) {
+func (r Resource) GetCalendar(c *gin.Context) {
 	cal, err := r.usecase.FindAllCal()
 
 	if err != nil {
