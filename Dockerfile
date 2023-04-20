@@ -4,7 +4,7 @@ WORKDIR /go/src
 
 COPY . .
 
-RUN go build -o api main.go
+RUN go build -o api .
 
 ENV GIN_MODE=release
 

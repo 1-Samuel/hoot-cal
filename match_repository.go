@@ -1,4 +1,4 @@
-package main
+package hoot_cal
 
 import (
 	"encoding/json"

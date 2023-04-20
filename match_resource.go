@@ -1,4 +1,4 @@
-package main
+package hoot_cal
 
 import (
 	"github.com/gin-gonic/gin"
