@@ -111,6 +111,25 @@ func main() {
 
 	r := gin.Default()
 
+	r.GET("/api/v1/matches", func(c *gin.Context) {
+		resp, err := client.Get("https://us.api.blizzard.com/owl/v1/owl2")
+
+		if err != nil {
+			return
+		}
+
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusOK {
+			response := &OwlResponse{}
+			json.NewDecoder(resp.Body).Decode(response)
+			matches := maps.Values(response.Matches)
+			sort.Slice(matches, func(i, j int) bool {
+				return time.Time(matches[i].StartTimestamp).After(time.Time(matches[j].StartTimestamp))
+			})
+			c.JSON(200, matches)
+		}
+	})
 	r.GET("/owl.ics", func(c *gin.Context) {
 		c.Header("Content-type", "text/calendar")
 		c.Header("charset", "utf-8")
