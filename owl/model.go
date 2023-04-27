@@ -7,6 +7,8 @@ type Match struct {
 	Teams []Team    `json:"teams"`
 	Start time.Time `json:"start"`
 	End   time.Time `json:"end"`
+	Event string    `json:"event"`
+	Link  string    `json:"link"`
 }
 
 type Team struct {

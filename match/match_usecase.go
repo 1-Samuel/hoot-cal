@@ -41,6 +41,8 @@ func (u Usecase) FindAllCal() (*ics.Calendar, error) {
 			event.SetStartAt(match.Start)
 			event.SetEndAt(match.End)
 			event.SetSummary(match.Teams[0].AbbreviatedName + " - " + match.Teams[1].AbbreviatedName)
+			event.SetDescription(match.Teams[0].Name + " - " + match.Teams[1].Name + "\n" + match.Event)
+			event.SetURL(match.Link)
 		}
 	}
 
