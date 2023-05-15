@@ -15,6 +15,7 @@ func NewMatchResource(repository owl.Repository) Resource {
 }
 
 func (r Resource) GetAll(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	matches, err := r.usecase.FindAll()
 
 	if err != nil {
@@ -23,6 +24,22 @@ func (r Resource) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, matches)
+}
+
+func (r Resource) GetActive(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	match, err := r.usecase.FindActive()
+
+	if err != nil {
+		if err == owl.ErrNotFound {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, match)
 }
 
 func (r Resource) GetCalendar(c *gin.Context) {

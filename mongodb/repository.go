@@ -9,20 +9,32 @@ import (
 )
 
 type respoitoryMongo struct {
-	coll *mongo.Collection
+	db *mongo.Database
 }
 
 func NewRepositoryMongo(db *mongo.Database) owl.Repository {
-	return respoitoryMongo{db.Collection("matches")}
+	return respoitoryMongo{db}
 }
 
 func (r respoitoryMongo) Get() ([]owl.Match, error) {
-	opts := options.Find().SetSort(bson.D{{"start", -1}})
-	cur, err := r.coll.Find(context.TODO(), bson.D{}, opts)
+	opts := options.Find().SetSort(bson.D{{"start", 1}})
+	cur, err := r.db.Collection("matches").Find(context.TODO(), bson.D{}, opts)
 	if err != nil {
 		return nil, err
 	}
 	var results []owl.Match
+	if err = cur.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (r respoitoryMongo) GetActive() ([]owl.ActiveMatch, error) {
+	cur, err := r.db.Collection("activeMatches").Find(context.TODO(), bson.D{})
+	if err != nil {
+		return nil, err
+	}
+	var results []owl.ActiveMatch
 	if err = cur.All(context.TODO(), &results); err != nil {
 		return nil, err
 	}

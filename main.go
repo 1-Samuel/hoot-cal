@@ -36,6 +36,7 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/api/v1/matches", resource.GetAll)
+	r.GET("/api/v1/matches/active", resource.GetActive)
 	r.GET("/owl.ics", resource.GetCalendar)
 
 	r.Run(":8080")
